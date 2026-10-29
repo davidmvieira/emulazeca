@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RETROZECA — Arcade Emulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{
+  --neon-pink:#ff2d95;
+  --neon-cyan:#00f0ff;
+  --neon-yellow:#ffe600;
+  --neon-purple:#b026ff;
+  --dark:#0a0410;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  min-height:100vh;
+  background:radial-gradient(ellipse at top,#2a0a3a 0%,#0a0410 60%),#0a0410;
+  color:#fff;
+  font-family:'VT323',monospace;
+  padding:2rem 1rem;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  overflow-x:hidden;
+  position:relative;
+}
+
+/* grid animado de fundo */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(176,38,255,.15) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(176,38,255,.15) 1px,transparent 1px);
+  background-size:40px 40px;
+  mask-image:linear-gradient(to bottom,transparent,#000 40%,#000 70%,transparent);
+  pointer-events:none;
+  animation:gridScroll 10s linear infinite;
+}
+@keyframes gridScroll{to{background-position:0 40px,40px 0;}}
+
+/* GABINETE */
+.cabinet{
+  position:relative;
+  width:100%;max-width:900px;
+  background:linear-gradient(180deg,#1a0a2a 0%,#0d0518 100%);
+  border:4px solid var(--neon-pink);
+  border-radius:20px 20px 8px 8px;
+  box-shadow:
+    0 0 30px rgba(255,45,149,.6),
+    0 0 60px rgba(255,45,149,.3),
+    inset 0 0 40px rgba(255,45,149,.15);
+  padding:1.5rem;
+  z-index:1;
+}
+
+/* MARQUEE */
+.marquee{
+  position:relative;
+  background:linear-gradient(180deg,#2a0a3a,#1a0622);
+  border:3px solid var(--neon-yellow);
+  border-radius:12px;
+  padding:1rem;
+  margin-bottom:1.25rem;
+  text-align:center;
+  overflow:hidden;
+  box-shadow:0 0 20px rgba(255,230,0,.5);
+}
+.marquee h1{
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(1.2rem,4vw,2.2rem);
+  letter-spacing:4px;
+  background:linear-gradient(180deg,#ffe600,#ff8c00,#ff2d95);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 8px rgba(255,45,149,.9));
+  animation:hueShift 4s ease-in-out infinite alternate;
+  position:relative;z-index:1;
+}
+@keyframes hueShift{
+  from{filter:drop-shadow(0 0 8px rgba(255,45,149,.9));}
+  to{filter:drop-shadow(0 0 14px rgba(0,240,255,.9)) hue-rotate(30deg);}
+}
+.bulbs{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle,#ffe600 1.5px,transparent 2px);
+  background-size:20px 20px;
+  opacity:.7;
+  animation:bulbsBlink 1s steps(2) infinite;
+}
+@keyframes bulbsBlink{50%{opacity:.25;}}
+
+/* TELA CRT */
+.screen-bezel{
+  background:linear-gradient(180deg,#050208,#0a0410);
+  border:6px solid #333;
+  border-radius:14px;
+  padding:8px;
+  box-shadow:
+    inset 0 0 20px rgba(0,0,0,.9),
+    0 0 15px rgba(0,240,255,.3);
+  position:relative;
+}
+.screen{
+  position:relative;
+  width:100%;height:480px;
+  background:#000;
+  border-radius:8px;overflow:hidden;
+  box-shadow:inset 0 0 60px rgba(0,240,255,.2);
+}
+#game{width:100%;height:100%;}
+.crt-overlay{
+  position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(
+    0deg,
+    rgba(0,0,0,.25) 0px,
+    rgba(0,0,0,.25) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  border-radius:8px;z-index:5;
+}
+.crt-overlay::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,.6) 100%);
+  border-radius:8px;
+}
+.idle-message{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  color:var(--neon-cyan);
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(.8rem,2vw,1.2rem);
+  text-align:center;padding:2rem;z-index:4;
+  text-shadow:0 0 10px var(--neon-cyan);
+  pointer-events:none;gap:.75rem;
+}
+.idle-message .coin{
+  animation:blink 1.2s steps(2) infinite;
+  margin-top:1rem;
+  color:var(--neon-yellow);
+  text-shadow:0 0 10px var(--neon-yellow);
+}
+@keyframes blink{50%{opacity:0;}}
+
+/* PAINEL DE CONTROLE */
+.control-panel{
+  margin-top:1.5rem;
+  padding:1.25rem;
+  background:linear-gradient(180deg,#1a0a2a,#0d0518);
+  border:3px solid var(--neon-purple);
+  border-radius:12px;
+  box-shadow:0 0 20px rgba(176,38,255,.4);
+}
+.label{
+  font-family:'Press Start 2P',monospace;
+  font-size:.65rem;
+  color:var(--neon-yellow);
+  letter-spacing:2px;
+  margin-bottom:.75rem;
+  text-shadow:0 0 6px rgba(255,230,0,.7);
+}
+
+/* SELEÇÃO DE SISTEMA */
+.systems{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.25rem;}
+.sys-btn{
+  font-family:'Press Start 2P',monospace;
+  font-size:.6rem;
+  padding:.7rem .9rem;
+  background:#1a0a2a;color:#888;
+  border:2px solid #4a2060;border-radius:6px;
+  cursor:pointer;transition:all .15s;letter-spacing:1px;
+}
+.sys-btn:hover{color:#fff;border-color:var(--neon-cyan);transform:translateY(-2px);}
+.sys-btn.active{
+  color:#0a0410;background:var(--neon-cyan);
+  border-color:var(--neon-cyan);
+  box-shadow:0 0 15px var(--neon-cyan);
+}
+
+/* CARTUCHO */
+.cartridge-area{
+  display:flex;flex-wrap:wrap;gap:1rem;align-items:center;
+  margin-bottom:1.25rem;
+}
+.cartridge-slot{
+  flex:1;min-width:200px;
+  display:flex;align-items:center;gap:.75rem;
+  padding:.75rem 1rem;
+  background:#050208;
+  border:2px dashed #4a2060;
+  border-radius:6px;cursor:pointer;
+  transition:all .2s;
+  font-family:'VT323',monospace;
+  font-size:1.1rem;color:#888;
+}
+.cartridge-slot:hover{
+  border-color:var(--neon-pink);
+  color:#fff;
+  box-shadow:0 0 12px rgba(255,45,149,.5);
+}
+.cartridge-slot.loaded{
+  border-style:solid;
+  border-color:var(--neon-cyan);
+  color:var(--neon-cyan);
+}
+.cartridge-slot .icon{font-size:1.5rem;}
+#romInput{display:none;}
+
+/* BOTÃO ARCADE */
+.btn-row{
+  display:flex;gap:1rem;justify-content:center;align-items:center;
+  padding-top:.5rem;
+}
+.arcade-btn{
+  font-family:'Press Start 2P',monospace;
+  font-size:.85rem;
+  padding:1.1rem 2rem;
+  border-radius:50px;border:none;cursor:pointer;
+  letter-spacing:2px;color:#fff;
+  background:radial-gradient(circle at 30% 30%,#ff5c5c,#c80000 60%,#800000);
+  box-shadow:
+    0 6px 0 #500000,
+    0 8px 15px rgba(0,0,0,.8),
+    inset 0 -3px 5px rgba(0,0,0,.4),
+    inset 0 3px 5px rgba(255,255,255,.3);
+  transition:all .08s;
+  text-shadow:0 2px 3px rgba(0,0,0,.5);
+}
+.arcade-btn:hover:not(:disabled){filter:brightness(1.15);}
+.arcade-btn:active:not(:disabled){
+  transform:translateY(5px);
+  box-shadow:
+    0 1px 0 #500000,
+    0 3px 8px rgba(0,0,0,.8),
+    inset 0 -2px 3px rgba(0,0,0,.4);
+}
+.arcade-btn:disabled{
+  background:radial-gradient(circle at 30% 30%,#555,#333 60%,#1a1a1a);
+  box-shadow:0 6px 0 #111,inset 0 -3px 5px rgba(0,0,0,.4);
+  cursor:not-allowed;opacity:.6;
+}
+
+.footer-note{
+  text-align:center;margin-top:1.25rem;
+  font-family:'VT323',monospace;color:#666;font-size:1rem;
+}
+.footer-note span{color:var(--neon-pink);}
+
+@media (max-width:640px){
+  .screen{height:300px;}
+  .cabinet{padding:1rem;}
+  .sys-btn{font-size:.5rem;padding:.5rem .6rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="cabinet">
+  <div class="marquee">
+    <div class="bulbs"></div>
+    <h1>RETROZECA</h1>
+  </div>
+
+  <div class="screen-bezel">
+    <div class="screen">
+      <div id="game"></div>
+      <div class="crt-overlay"></div>
+      <div class="idle-message" id="idleMessage">
+        <div>★ ESCOLHA O SISTEMA ★</div>
+        <div>CARREGUE SUA ROM</div>
+        <div class="coin">&gt;&gt; INSERT COIN &lt;&lt;</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="control-panel">
+    <div class="label">▸ SELECIONE O SISTEMA</div>
+    <div class="systems" id="systems">
+      <button class="sys-btn active" data-core="snes">SNES</button>
+      <button class="sys-btn" data-core="nes">NES</button>
+      <button class="sys-btn" data-core="gba">GAME BOY ADV</button>
+      <button class="sys-btn" data-core="gb">GAME BOY</button>
+      <button class="sys-btn" data-core="segaMD">MEGA DRIVE</button>
+      <button class="sys-btn" data-core="psx">PLAYSTATION</button>
+    </div>
+
+    <div class="label">▸ INSIRA O CARTRIDGE</div>
+    <div class="cartridge-area">
+      <label class="cartridge-slot" id="cartridgeSlot" for="romInput">
+        <span class="icon">💾</span>
+        <span id="cartridgeText">Clique para carregar a ROM...</span>
+      </label>
+      <input type="file" id="romInput"
+             accept=".smc,.sfc,.nes,.gba,.gb,.gbc,.md,.gen,.bin,.iso,.cue,.zip">
+    </div>
+
+    <div class="btn-row">
+      <button class="arcade-btn" id="playBtn" disabled>▶ JOGAR</button>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <span>RETROZECA</span> © 199X — use apenas ROMs que você possui legalmente
+  </div>
+</div>
+
+<script>
+  let romUrl = null;
+  let currentCore = 'snes';
+  let gameStarted = false;
+
+  const romInput       = document.getElementById('romInput');
+  const playBtn        = document.getElementById('playBtn');
+  const cartridgeSlot  = document.getElementById('cartridgeSlot');
+  const cartridgeText  = document.getElementById('cartridgeText');
+  const idleMessage    = document.getElementById('idleMessage');
+  const systemsDiv     = document.getElementById('systems');
+  const gameContainer  = document.getElementById('game');
+
+  // Seleção de sistema
+  systemsDiv.addEventListener('click', (e) => {
+    const btn = e.target.closest('.sys-btn');
+    if (!btn || gameStarted) return;
+    document.querySelectorAll('.sys-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentCore = btn.dataset.core;
+  });
+
+  // Carregar ROM
+  romInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (romUrl) URL.revokeObjectURL(romUrl);
+    romUrl = URL.createObjectURL(file);
+    cartridgeText.textContent = file.name;
+    cartridgeSlot.classList.add('loaded');
+    playBtn.disabled = false;
+  });
+
+  // Botão JOGAR / NOVO JOGO
+  playBtn.addEventListener('click', () => {
+    if (gameStarted) { location.reload(); return; }
+    if (!romUrl) return;
+
+    idleMessage.style.display = 'none';
+    gameContainer.innerHTML = '';
+
+    window.EJS_player       = '#game';
+    window.EJS_core         = currentCore;
+    window.EJS_gameUrl      = romUrl;
+    window.EJS_pathtodata   = 'https://cdn.emulatorjs.org/stable/data/';
+    window.EJS_startOnLoaded = true;
+
+    const script = document.createElement('script');
+    script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+    document.body.appendChild(script);
+
+    gameStarted = true;
+    playBtn.textContent = '⟲ NOVO JOGO';
+    playBtn.style.background =
+      'radial-gradient(circle at 30% 30%,#ffdd55,#ffaa00 60%,#a06a00)';
+    playBtn.style.boxShadow =
+      '0 6px 0 #603f00,0 8px 15px rgba(0,0,0,.8),' +
+      'inset 0 -3px 5px rgba(0,0,0,.4),inset 0 3px 5px rgba(255,255,255,.3)';
+  });
+</script>
+</body>
+</html>
