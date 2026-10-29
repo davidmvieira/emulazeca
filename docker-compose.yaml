@@ -1,8 +1,21 @@
 version: '3.8'
 services:
-  emulador:
-    build: .
-    container_name: emulador-retro
+  netplay:
+    build:
+      context: .
+      dockerfile: Dockerfile.netplay
+    container_name: retrozeca-netplay
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: retrozeca-web
     ports:
       - "8080:80"
     restart: unless-stopped
+    depends_on:
+      - netplay

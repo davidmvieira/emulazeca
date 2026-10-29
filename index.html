@@ -300,6 +300,27 @@ body::before{
              accept=".smc,.sfc,.nes,.gba,.gb,.gbc,.md,.gen,.bin,.iso,.cue,.zip">
     </div>
 
+    <!-- NOVO: campo de ID da sala -->
+    <div class="label">▸ ID DA SALA (opcional, para jogar em rede)</div>
+    <div style="margin-bottom:1rem;">
+      <input type="number" id="roomId" placeholder="Ex: 1234"
+             style="
+               font-family:'Press Start 2P',monospace;
+               font-size:.8rem;
+               padding:.8rem 1rem;
+               background:#050208;
+               color:var(--neon-cyan);
+               border:2px solid #4a2060;
+               border-radius:6px;
+               width:200px;
+               text-align:center;
+               letter-spacing:2px;
+             ">
+      <span style="font-family:'VT323',monospace;color:#666;font-size:.9rem;">
+        (mesmo ID nos dois PCs)
+      </span>
+    </div>
+
     <div class="btn-row">
       <button class="arcade-btn" id="playBtn" disabled>▶ JOGAR</button>
     </div>
@@ -322,8 +343,9 @@ body::before{
   const idleMessage    = document.getElementById('idleMessage');
   const systemsDiv     = document.getElementById('systems');
   const gameContainer  = document.getElementById('game');
+  const roomIdInput    = document.getElementById('roomId'); // NOVO
 
-  // Seleção de sistema
+  // (Seleção de sistema e carregamento de ROM permanecem IGUAIS)
   systemsDiv.addEventListener('click', (e) => {
     const btn = e.target.closest('.sys-btn');
     if (!btn || gameStarted) return;
@@ -332,7 +354,6 @@ body::before{
     currentCore = btn.dataset.core;
   });
 
-  // Carregar ROM
   romInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -343,7 +364,7 @@ body::before{
     playBtn.disabled = false;
   });
 
-  // Botão JOGAR / NOVO JOGO
+  // Botão JOGAR — agora configura netplay se houver ID
   playBtn.addEventListener('click', () => {
     if (gameStarted) { location.reload(); return; }
     if (!romUrl) return;
@@ -351,11 +372,31 @@ body::before{
     idleMessage.style.display = 'none';
     gameContainer.innerHTML = '';
 
+    // --- Configuração básica do EmulatorJS ---
     window.EJS_player       = '#game';
     window.EJS_core         = currentCore;
     window.EJS_gameUrl      = romUrl;
     window.EJS_pathtodata   = 'https://cdn.emulatorjs.org/stable/data/';
     window.EJS_startOnLoaded = true;
+
+    // --- Netplay (se o campo de ID estiver preenchido) ---
+    const roomId = roomIdInput.value.trim();
+    if (roomId) {
+      // Endereço do servidor de netplay.
+      // Troque "localhost" pelo IP da máquina host se for jogar em outro PC.
+      window.EJS_netplayServer = 'http://localhost:3000';
+
+      // Cada sala precisa de um ID único. Usamos o número digitado.
+      window.EJS_gameID = parseInt(roomId, 10);
+
+      // STUN público do Google (suficiente para a maioria dos casos).
+      // Para jogar fora da sua rede local com NAT restritivo, adicione um TURN.
+      window.EJS_netplayICEServers = [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ];
+    }
+    // ----------------------------------------------------
 
     const script = document.createElement('script');
     script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
