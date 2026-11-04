@@ -74,6 +74,13 @@ body::before{
 .screen{position:relative;width:100%;height:480px;background:#000;
   border-radius:8px;overflow:hidden;box-shadow:inset 0 0 60px rgba(0,240,255,.2);}
 #game{width:100%;height:100%;}
+#kickRoomBtn{
+  position:absolute;top:.75rem;right:.75rem;z-index:6;display:none;
+  padding:.65rem .8rem;background:#c80000;color:#fff;border:2px solid #ff5c5c;
+  border-radius:6px;font-family:'Press Start 2P',monospace;font-size:.55rem;
+  cursor:pointer;
+}
+#kickRoomBtn:hover{filter:brightness(1.2);}
 .crt-overlay{
   position:absolute;inset:0;pointer-events:none;
   background:repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0px,rgba(0,0,0,.25) 1px,transparent 1px,transparent 3px);
@@ -207,6 +214,7 @@ body::before{
   <div class="screen-bezel">
     <div class="screen">
       <div id="game"></div>
+      <button id="kickRoomBtn" type="button">KICKAR JOGADOR</button>
       <div class="crt-overlay"></div>
       <div class="idle-message" id="idleMessage">
         <div>★ ESCOLHA O SISTEMA ★</div>
@@ -285,10 +293,12 @@ const ICE_SERVERS = [
    ESTADO
    ============================================================ */
 let romFile         = null;   // File local
-let romServerInfo   = null;   // { romId, url, name } após upload
 let currentCore     = 'snes';
 let gameStarted     = false;
 let lobbyIntervalId = null;
+let kickPollIntervalId = null;
+let activeRoomId = null;
+let activeHostToken = null;
 
 /* ============================================================
    ELEMENTOS
@@ -307,6 +317,7 @@ const refreshRoomsBtn = document.getElementById('refreshRoomsBtn');
 const createRoomBtn   = document.getElementById('createRoomBtn');
 const closeLobbyBtn   = document.getElementById('closeLobbyBtn');
 const statusMsg       = document.getElementById('statusMsg');
+const kickRoomBtn     = document.getElementById('kickRoomBtn');
 
 /* ============================================================
    SELEÇÃO DE SISTEMA
@@ -327,34 +338,28 @@ romInput.addEventListener('change', async (e) => {
   if (!file) return;
 
   romFile = file;
-  romServerInfo = null;
   cartridgeText.textContent = file.name;
   cartridgeSlot.classList.add('loaded');
   playBtn.disabled = false;
   multiplayerBtn.disabled = false;
-
-  // Pré-upload para o romserver (assim fica pronto para criar sala)
-  statusMsg.textContent = 'Enviando ROM para o servidor...';
-  try {
-    const fd = new FormData();
-    fd.append('rom', file);
-    const r = await fetch(`${ROMSERVER}/upload`, { method: 'POST', body: fd });
-    if (!r.ok) throw new Error('upload falhou');
-    romServerInfo = await r.json();
-    createRoomBtn.disabled = false;
-    statusMsg.textContent = 'ROM pronta para multiplayer.';
-  } catch (err) {
-    console.error(err);
-    statusMsg.textContent = 'Não foi possível enviar a ROM (multiplayer desabilitado).';
-  }
+  createRoomBtn.disabled = false;
+  statusMsg.textContent = 'ROM pronta para criar uma sala.';
 });
 
 /* ============================================================
    INICIALIZAÇÃO DO EMULADOR
    ============================================================ */
-function startEmulator({ core, gameUrl, gameId = null }) {
+function startEmulator({ core, gameUrl, roomId = null, isHost = false, hostToken = null }) {
   idleMessage.style.display = 'none';
   gameContainer.innerHTML = '';
+  if (kickPollIntervalId) {
+    clearInterval(kickPollIntervalId);
+    kickPollIntervalId = null;
+  }
+  activeRoomId = roomId;
+  activeHostToken = isHost ? hostToken : null;
+  kickRoomBtn.style.display = isHost ? 'block' : 'none';
+  kickRoomBtn.disabled = false;
 
   window.EJS_player        = '#game';
   window.EJS_core          = core;
@@ -362,9 +367,9 @@ function startEmulator({ core, gameUrl, gameId = null }) {
   window.EJS_pathtodata    = 'https://cdn.emulatorjs.org/stable/data/';
   window.EJS_startOnLoaded = true;
 
-  if (gameId) {
+  if (roomId !== null) {
     window.EJS_netplayServer     = NETPLAY_SERVER;
-    window.EJS_gameID            = gameId;
+    window.EJS_gameID            = String(roomId);
     window.EJS_netplayICEServers = ICE_SERVERS;
   }
 
@@ -375,6 +380,9 @@ function startEmulator({ core, gameUrl, gameId = null }) {
   gameStarted = true;
   playBtn.textContent = '⟲ NOVO JOGO';
   multiplayerBtn.disabled = true;
+  if (!isHost && roomId !== null) {
+    kickPollIntervalId = setInterval(() => checkRoomStatus(roomId), 3000);
+  }
   closeLobby();
 }
 
@@ -408,43 +416,44 @@ refreshRoomsBtn.addEventListener('click', refreshRooms);
 
 async function refreshRooms() {
   try {
-    const url = `${NETPLAY_SERVER}/list?domain=${encodeURIComponent(HOST)}`;
-    const r = await fetch(url);
-    if (!r.ok) throw new Error('list falhou');
+    const r = await fetch(`${ROMSERVER}/api/rooms`);
+    if (!r.ok) {
+      const error = await r.json();
+      throw new Error(error.error || 'Não foi possível listar salas');
+    }
     const data = await r.json();
     renderRooms(Array.isArray(data.rooms) ? data.rooms : []);
   } catch (err) {
     console.error(err);
     roomListEl.innerHTML =
-      '<div class="room-empty">Não foi possível listar salas.<br>Verifique se o netplay está rodando.</div>';
+      '<div class="room-empty">Não foi possível listar as salas.<br>Verifique o romserver e o PostgreSQL.</div>';
   }
 }
 
 function renderRooms(rooms) {
-  const ocupadas = rooms.filter(r => (r.current || 0) < (r.max || 2));
-  if (ocupadas.length === 0) {
+  if (rooms.length === 0) {
     roomListEl.innerHTML = '<div class="room-empty">Nenhuma sala aberta. Crie a sua!</div>';
     return;
   }
   roomListEl.innerHTML = '';
-  for (const room of ocupadas) {
+  for (const room of rooms) {
     const div = document.createElement('div');
     div.className = 'room-item';
 
     const info = document.createElement('div');
     info.className = 'room-info';
-    const gameId = room.game_id ?? '?';
+    const roomId = room.id;
     const nameEl = document.createElement('div');
     nameEl.className = 'room-name';
-    nameEl.textContent = `SALA #${gameId}`;
+    nameEl.textContent = `${room.room_name || 'Sala'}${room.requires_password ? ' 🔒' : ''}`;
     const detail = document.createElement('div');
-    detail.textContent = `${room.room_name || 'Jogador'} — ${room.current || 0}/${room.max || 2}`;
+    detail.textContent = `#${roomId} · ROM: ${room.rom_name} · Host: ${room.host_ip}`;
     info.appendChild(nameEl);
     info.appendChild(detail);
 
     const joinBtn = document.createElement('button');
     joinBtn.textContent = 'ENTRAR';
-    joinBtn.onclick = () => joinRoom(room.game_id);
+    joinBtn.onclick = () => joinRoom(roomId, room.requires_password);
 
     div.appendChild(info);
     div.appendChild(joinBtn);
@@ -458,72 +467,113 @@ function renderRooms(rooms) {
 createRoomBtn.addEventListener('click', async () => {
   if (!romFile) { statusMsg.textContent = 'Carregue uma ROM primeiro.'; return; }
 
-  // Garante upload
-  if (!romServerInfo) {
-    statusMsg.textContent = 'Enviando ROM...';
-    try {
-      const fd = new FormData();
-      fd.append('rom', romFile);
-      const r = await fetch(`${ROMSERVER}/upload`, { method: 'POST', body: fd });
-      romServerInfo = await r.json();
-    } catch (err) {
-      statusMsg.textContent = 'Falha no upload da ROM.';
-      return;
-    }
+  const roomName = prompt('Nome da sala:');
+  if (roomName === null) return;
+  if (!roomName.trim()) {
+    statusMsg.textContent = 'Informe um nome para a sala.';
+    return;
   }
+  const password = prompt('Senha da sala (deixe em branco para sala pública):');
+  if (password === null) return;
 
-  statusMsg.textContent = 'Criando sala...';
+  statusMsg.textContent = 'Enviando a ROM e criando a sala...';
   try {
-    const r = await fetch(`${ROMSERVER}/rooms`, {
+    const formData = new FormData();
+    formData.append('rom', romFile);
+    formData.append('name', roomName.trim());
+    formData.append('password', password);
+    formData.append('host_ip', HOST);
+    const r = await fetch(`${ROMSERVER}/api/rooms`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        romId:   romServerInfo.romId,
-        romName: romServerInfo.name,
-      }),
+      body: formData,
     });
-    if (!r.ok) throw new Error('create room falhou');
+    if (!r.ok) {
+      const error = await r.json();
+      throw new Error(error.error || 'Não foi possível criar a sala');
+    }
     const data = await r.json();
-
-    // Host usa o blob local (rápido), mas o gameId é o da sala registrada.
     const blobUrl = URL.createObjectURL(romFile);
     startEmulator({
       core:    currentCore,
       gameUrl: blobUrl,
-      gameId:  data.gameId,
+      roomId:  data.roomId,
+      isHost:  true,
+      hostToken: data.hostToken,
     });
   } catch (err) {
     console.error(err);
-    statusMsg.textContent = 'Não foi possível criar a sala.';
+    statusMsg.textContent = `Não foi possível criar a sala: ${err.message}`;
   }
 });
 
 /* ============================================================
    ENTRAR EM SALA (client)
    ============================================================ */
-async function joinRoom(gameId) {
-  if (!gameId) return;
-  statusMsg.textContent = `Entrando na sala #${gameId}...`;
+async function joinRoom(roomId, requiresPassword) {
+  if (!roomId) return;
+  const password = requiresPassword ? prompt('Digite a senha da sala:') : '';
+  if (password === null) return;
+  statusMsg.textContent = `Entrando na sala #${roomId}...`;
 
   try {
-    const r = await fetch(`${ROMSERVER}/rooms/${gameId}`);
+    const r = await fetch(`${ROMSERVER}/api/rooms/${roomId}/join`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
     if (!r.ok) {
-      statusMsg.textContent =
-        `Sala #${gameId} existe no netplay, mas a ROM não está no servidor. Peça ao host para criar a sala pelo RETROZECA.`;
-      return;
+      const error = await r.json();
+      throw new Error(error.error || 'Não foi possível entrar na sala');
     }
     const info = await r.json();
-    const romUrl = `${ROMSERVER}${info.url}`;
-
-    statusMsg.textContent = `Baixando ${info.romName}...`;
+    statusMsg.textContent = `Baixando ${info.rom_name}...`;
     startEmulator({
       core:    currentCore,
-      gameUrl: romUrl,
-      gameId:  Number(gameId),
+      gameUrl: info.rom_url,
+      roomId,
     });
   } catch (err) {
     console.error(err);
-    statusMsg.textContent = 'Falha ao entrar na sala.';
+    statusMsg.textContent = `Falha ao entrar na sala: ${err.message}`;
+  }
+}
+
+kickRoomBtn.addEventListener('click', async () => {
+  if (!activeRoomId || !activeHostToken) return;
+  kickRoomBtn.disabled = true;
+  try {
+    const r = await fetch(`${ROMSERVER}/api/rooms/${activeRoomId}/kick`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${activeHostToken}` },
+    });
+    if (!r.ok) {
+      const error = await r.json();
+      throw new Error(error.error || 'Não foi possível ejetar o jogador');
+    }
+    statusMsg.textContent = 'Jogador ejetado da sala.';
+  } catch (err) {
+    console.error(err);
+    statusMsg.textContent = `Falha ao ejetar jogador: ${err.message}`;
+    kickRoomBtn.disabled = false;
+  }
+});
+
+async function checkRoomStatus(roomId) {
+  try {
+    const r = await fetch(`${ROMSERVER}/api/rooms/${roomId}/status`);
+    if (!r.ok) {
+      const error = await r.json();
+      throw new Error(error.error || 'Não foi possível verificar a sala');
+    }
+    const data = await r.json();
+    if (data.status === 'kicked') {
+      clearInterval(kickPollIntervalId);
+      kickPollIntervalId = null;
+      alert('Você foi ejetado pelo Host!');
+      location.reload();
+    }
+  } catch (err) {
+    console.error('Falha ao verificar status da sala:', err);
   }
 }
 </script>

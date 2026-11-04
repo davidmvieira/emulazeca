@@ -1,4 +1,7 @@
-FROM node:18-alpine
-RUN npm install -g @warren-bank/netplay
+FROM node:20-alpine
+WORKDIR /app
+RUN apk add --no-cache git
+RUN git clone --depth 1 https://github.com/warren-bank/fork-node-EmulatorJS-Netplay.git .
+RUN npm install --omit=dev
 EXPOSE 3000
-CMD ["netplay"]
+CMD ["npm", "start"]

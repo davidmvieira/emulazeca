@@ -1,9 +1,8 @@
-version: '3.8'
 services:
   netplay:
     build:
       context: .
-      dockerfile: Dockerfile.netplay
+      dockerfile: dockerfile.netplay
     container_name: retrozeca-netplay
     ports:
       - "3000:3000"
@@ -12,7 +11,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
     container_name: retrozeca-web
     ports:
       - "8080:80"
@@ -24,12 +23,20 @@ services:
   romserver:
     build:
       context: .
-      dockerfile: Dockerfile.romserver
+      dockerfile: dockerfile.romserver
     container_name: retrozeca-romserver
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "4000:4000"
     volumes:
       - roms_data:/data
+    environment:
+      PGHOST: host.docker.internal
+      PGPORT: 5432
+      PGUSER: ${PGUSER:-postgres}
+      PGPASSWORD: ${PGPASSWORD:-}
+      PGDATABASE: ${PGDATABASE:-retrozeca}
     restart: unless-stopped
 
 volumes:
