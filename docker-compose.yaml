@@ -19,3 +19,18 @@ services:
     restart: unless-stopped
     depends_on:
       - netplay
+      - romserver
+
+  romserver:
+    build:
+      context: .
+      dockerfile: Dockerfile.romserver
+    container_name: retrozeca-romserver
+    ports:
+      - "4000:4000"
+    volumes:
+      - roms_data:/data
+    restart: unless-stopped
+
+volumes:
+  roms_data:

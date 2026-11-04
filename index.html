@@ -9,78 +9,50 @@
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
 :root{
-  --neon-pink:#ff2d95;
-  --neon-cyan:#00f0ff;
-  --neon-yellow:#ffe600;
-  --neon-purple:#b026ff;
-  --dark:#0a0410;
+  --neon-pink:#ff2d95; --neon-cyan:#00f0ff; --neon-yellow:#ffe600;
+  --neon-purple:#b026ff; --dark:#0a0410;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 
 body{
   min-height:100vh;
   background:radial-gradient(ellipse at top,#2a0a3a 0%,#0a0410 60%),#0a0410;
-  color:#fff;
-  font-family:'VT323',monospace;
-  padding:2rem 1rem;
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  overflow-x:hidden;
-  position:relative;
+  color:#fff;font-family:'VT323',monospace;
+  padding:2rem 1rem;display:flex;justify-content:center;align-items:flex-start;
+  overflow-x:hidden;position:relative;
 }
-
-/* grid animado de fundo */
 body::before{
-  content:'';
-  position:fixed;inset:0;
+  content:'';position:fixed;inset:0;
   background-image:
     linear-gradient(rgba(176,38,255,.15) 1px,transparent 1px),
     linear-gradient(90deg,rgba(176,38,255,.15) 1px,transparent 1px);
   background-size:40px 40px;
   mask-image:linear-gradient(to bottom,transparent,#000 40%,#000 70%,transparent);
-  pointer-events:none;
-  animation:gridScroll 10s linear infinite;
+  pointer-events:none;animation:gridScroll 10s linear infinite;
 }
 @keyframes gridScroll{to{background-position:0 40px,40px 0;}}
 
-/* GABINETE */
 .cabinet{
-  position:relative;
-  width:100%;max-width:900px;
+  position:relative;width:100%;max-width:900px;
   background:linear-gradient(180deg,#1a0a2a 0%,#0d0518 100%);
-  border:4px solid var(--neon-pink);
-  border-radius:20px 20px 8px 8px;
-  box-shadow:
-    0 0 30px rgba(255,45,149,.6),
-    0 0 60px rgba(255,45,149,.3),
-    inset 0 0 40px rgba(255,45,149,.15);
-  padding:1.5rem;
-  z-index:1;
+  border:4px solid var(--neon-pink);border-radius:20px 20px 8px 8px;
+  box-shadow:0 0 30px rgba(255,45,149,.6),0 0 60px rgba(255,45,149,.3),
+             inset 0 0 40px rgba(255,45,149,.15);
+  padding:1.5rem;z-index:1;
 }
-
-/* MARQUEE */
 .marquee{
-  position:relative;
-  background:linear-gradient(180deg,#2a0a3a,#1a0622);
-  border:3px solid var(--neon-yellow);
-  border-radius:12px;
-  padding:1rem;
-  margin-bottom:1.25rem;
-  text-align:center;
-  overflow:hidden;
+  position:relative;background:linear-gradient(180deg,#2a0a3a,#1a0622);
+  border:3px solid var(--neon-yellow);border-radius:12px;
+  padding:1rem;margin-bottom:1.25rem;text-align:center;overflow:hidden;
   box-shadow:0 0 20px rgba(255,230,0,.5);
 }
 .marquee h1{
   font-family:'Press Start 2P',monospace;
-  font-size:clamp(1.2rem,4vw,2.2rem);
-  letter-spacing:4px;
+  font-size:clamp(1.2rem,4vw,2.2rem);letter-spacing:4px;
   background:linear-gradient(180deg,#ffe600,#ff8c00,#ff2d95);
-  -webkit-background-clip:text;background-clip:text;
-  -webkit-text-fill-color:transparent;
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
   filter:drop-shadow(0 0 8px rgba(255,45,149,.9));
-  animation:hueShift 4s ease-in-out infinite alternate;
-  position:relative;z-index:1;
+  animation:hueShift 4s ease-in-out infinite alternate;position:relative;z-index:1;
 }
 @keyframes hueShift{
   from{filter:drop-shadow(0 0 8px rgba(255,45,149,.9));}
@@ -89,40 +61,22 @@ body::before{
 .bulbs{
   position:absolute;inset:0;pointer-events:none;
   background-image:radial-gradient(circle,#ffe600 1.5px,transparent 2px);
-  background-size:20px 20px;
-  opacity:.7;
-  animation:bulbsBlink 1s steps(2) infinite;
+  background-size:20px 20px;opacity:.7;animation:bulbsBlink 1s steps(2) infinite;
 }
 @keyframes bulbsBlink{50%{opacity:.25;}}
 
-/* TELA CRT */
 .screen-bezel{
   background:linear-gradient(180deg,#050208,#0a0410);
-  border:6px solid #333;
-  border-radius:14px;
-  padding:8px;
-  box-shadow:
-    inset 0 0 20px rgba(0,0,0,.9),
-    0 0 15px rgba(0,240,255,.3);
+  border:6px solid #333;border-radius:14px;padding:8px;
+  box-shadow:inset 0 0 20px rgba(0,0,0,.9),0 0 15px rgba(0,240,255,.3);
   position:relative;
 }
-.screen{
-  position:relative;
-  width:100%;height:480px;
-  background:#000;
-  border-radius:8px;overflow:hidden;
-  box-shadow:inset 0 0 60px rgba(0,240,255,.2);
-}
+.screen{position:relative;width:100%;height:480px;background:#000;
+  border-radius:8px;overflow:hidden;box-shadow:inset 0 0 60px rgba(0,240,255,.2);}
 #game{width:100%;height:100%;}
 .crt-overlay{
   position:absolute;inset:0;pointer-events:none;
-  background:repeating-linear-gradient(
-    0deg,
-    rgba(0,0,0,.25) 0px,
-    rgba(0,0,0,.25) 1px,
-    transparent 1px,
-    transparent 3px
-  );
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.25) 0px,rgba(0,0,0,.25) 1px,transparent 1px,transparent 3px);
   border-radius:8px;z-index:5;
 }
 .crt-overlay::after{
@@ -131,125 +85,108 @@ body::before{
   border-radius:8px;
 }
 .idle-message{
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;justify-content:center;align-items:center;
-  color:var(--neon-cyan);
-  font-family:'Press Start 2P',monospace;
-  font-size:clamp(.8rem,2vw,1.2rem);
-  text-align:center;padding:2rem;z-index:4;
-  text-shadow:0 0 10px var(--neon-cyan);
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;color:var(--neon-cyan);
+  font-family:'Press Start 2P',monospace;font-size:clamp(.8rem,2vw,1.2rem);
+  text-align:center;padding:2rem;z-index:4;text-shadow:0 0 10px var(--neon-cyan);
   pointer-events:none;gap:.75rem;
 }
-.idle-message .coin{
-  animation:blink 1.2s steps(2) infinite;
-  margin-top:1rem;
-  color:var(--neon-yellow);
-  text-shadow:0 0 10px var(--neon-yellow);
-}
+.idle-message .coin{animation:blink 1.2s steps(2) infinite;margin-top:1rem;
+  color:var(--neon-yellow);text-shadow:0 0 10px var(--neon-yellow);}
 @keyframes blink{50%{opacity:0;}}
 
-/* PAINEL DE CONTROLE */
 .control-panel{
-  margin-top:1.5rem;
-  padding:1.25rem;
+  margin-top:1.5rem;padding:1.25rem;
   background:linear-gradient(180deg,#1a0a2a,#0d0518);
-  border:3px solid var(--neon-purple);
-  border-radius:12px;
+  border:3px solid var(--neon-purple);border-radius:12px;
   box-shadow:0 0 20px rgba(176,38,255,.4);
 }
 .label{
-  font-family:'Press Start 2P',monospace;
-  font-size:.65rem;
-  color:var(--neon-yellow);
-  letter-spacing:2px;
-  margin-bottom:.75rem;
+  font-family:'Press Start 2P',monospace;font-size:.65rem;
+  color:var(--neon-yellow);letter-spacing:2px;margin-bottom:.75rem;
   text-shadow:0 0 6px rgba(255,230,0,.7);
 }
-
-/* SELEÇÃO DE SISTEMA */
 .systems{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.25rem;}
 .sys-btn{
-  font-family:'Press Start 2P',monospace;
-  font-size:.6rem;
-  padding:.7rem .9rem;
-  background:#1a0a2a;color:#888;
-  border:2px solid #4a2060;border-radius:6px;
+  font-family:'Press Start 2P',monospace;font-size:.6rem;padding:.7rem .9rem;
+  background:#1a0a2a;color:#888;border:2px solid #4a2060;border-radius:6px;
   cursor:pointer;transition:all .15s;letter-spacing:1px;
 }
 .sys-btn:hover{color:#fff;border-color:var(--neon-cyan);transform:translateY(-2px);}
-.sys-btn.active{
-  color:#0a0410;background:var(--neon-cyan);
-  border-color:var(--neon-cyan);
-  box-shadow:0 0 15px var(--neon-cyan);
-}
+.sys-btn.active{color:#0a0410;background:var(--neon-cyan);border-color:var(--neon-cyan);
+  box-shadow:0 0 15px var(--neon-cyan);}
 
-/* CARTUCHO */
-.cartridge-area{
-  display:flex;flex-wrap:wrap;gap:1rem;align-items:center;
-  margin-bottom:1.25rem;
-}
+.cartridge-area{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;margin-bottom:1.25rem;}
 .cartridge-slot{
-  flex:1;min-width:200px;
-  display:flex;align-items:center;gap:.75rem;
-  padding:.75rem 1rem;
-  background:#050208;
-  border:2px dashed #4a2060;
-  border-radius:6px;cursor:pointer;
-  transition:all .2s;
-  font-family:'VT323',monospace;
-  font-size:1.1rem;color:#888;
+  flex:1;min-width:200px;display:flex;align-items:center;gap:.75rem;
+  padding:.75rem 1rem;background:#050208;border:2px dashed #4a2060;
+  border-radius:6px;cursor:pointer;transition:all .2s;
+  font-family:'VT323',monospace;font-size:1.1rem;color:#888;
 }
-.cartridge-slot:hover{
-  border-color:var(--neon-pink);
-  color:#fff;
-  box-shadow:0 0 12px rgba(255,45,149,.5);
-}
-.cartridge-slot.loaded{
-  border-style:solid;
-  border-color:var(--neon-cyan);
-  color:var(--neon-cyan);
-}
+.cartridge-slot:hover{border-color:var(--neon-pink);color:#fff;
+  box-shadow:0 0 12px rgba(255,45,149,.5);}
+.cartridge-slot.loaded{border-style:solid;border-color:var(--neon-cyan);color:var(--neon-cyan);}
 .cartridge-slot .icon{font-size:1.5rem;}
 #romInput{display:none;}
 
-/* BOTÃO ARCADE */
-.btn-row{
-  display:flex;gap:1rem;justify-content:center;align-items:center;
-  padding-top:.5rem;
-}
+.btn-row{display:flex;gap:1rem;justify-content:center;align-items:center;
+  padding-top:.5rem;flex-wrap:wrap;}
 .arcade-btn{
-  font-family:'Press Start 2P',monospace;
-  font-size:.85rem;
-  padding:1.1rem 2rem;
-  border-radius:50px;border:none;cursor:pointer;
-  letter-spacing:2px;color:#fff;
+  font-family:'Press Start 2P',monospace;font-size:.85rem;padding:1.1rem 2rem;
+  border-radius:50px;border:none;cursor:pointer;letter-spacing:2px;color:#fff;
   background:radial-gradient(circle at 30% 30%,#ff5c5c,#c80000 60%,#800000);
-  box-shadow:
-    0 6px 0 #500000,
-    0 8px 15px rgba(0,0,0,.8),
-    inset 0 -3px 5px rgba(0,0,0,.4),
-    inset 0 3px 5px rgba(255,255,255,.3);
-  transition:all .08s;
-  text-shadow:0 2px 3px rgba(0,0,0,.5);
+  box-shadow:0 6px 0 #500000,0 8px 15px rgba(0,0,0,.8),
+             inset 0 -3px 5px rgba(0,0,0,.4),inset 0 3px 5px rgba(255,255,255,.3);
+  transition:all .08s;text-shadow:0 2px 3px rgba(0,0,0,.5);
 }
 .arcade-btn:hover:not(:disabled){filter:brightness(1.15);}
-.arcade-btn:active:not(:disabled){
-  transform:translateY(5px);
-  box-shadow:
-    0 1px 0 #500000,
-    0 3px 8px rgba(0,0,0,.8),
-    inset 0 -2px 3px rgba(0,0,0,.4);
-}
-.arcade-btn:disabled{
-  background:radial-gradient(circle at 30% 30%,#555,#333 60%,#1a1a1a);
+.arcade-btn:active:not(:disabled){transform:translateY(5px);
+  box-shadow:0 1px 0 #500000,0 3px 8px rgba(0,0,0,.8),inset 0 -2px 3px rgba(0,0,0,.4);}
+.arcade-btn:disabled{background:radial-gradient(circle at 30% 30%,#555,#333 60%,#1a1a1a);
   box-shadow:0 6px 0 #111,inset 0 -3px 5px rgba(0,0,0,.4);
-  cursor:not-allowed;opacity:.6;
+  cursor:not-allowed;opacity:.6;}
+.arcade-btn.cyan{
+  background:radial-gradient(circle at 30% 30%,#4dd0ff,#0096cc 60%,#005a7a);
+  box-shadow:0 6px 0 #002d3d,0 8px 15px rgba(0,0,0,.8),
+             inset 0 -3px 5px rgba(0,0,0,.4),inset 0 3px 5px rgba(255,255,255,.3);
 }
 
-.footer-note{
-  text-align:center;margin-top:1.25rem;
-  font-family:'VT323',monospace;color:#666;font-size:1rem;
+.lobby-panel{
+  margin-top:1.25rem;padding:1rem;background:#050208;
+  border:2px solid var(--neon-cyan);border-radius:10px;
+  box-shadow:0 0 15px rgba(0,240,255,.3);
 }
+.room-list{display:flex;flex-direction:column;gap:.5rem;margin:.75rem 0;
+  max-height:220px;overflow-y:auto;}
+.room-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:.6rem .8rem;background:#0d0518;border:1px solid #4a2060;
+  border-radius:6px;font-family:'VT323',monospace;font-size:1.05rem;
+  color:#bbb;gap:.75rem;
+}
+.room-item:hover{border-color:var(--neon-cyan);color:#fff;}
+.room-item .room-info{display:flex;flex-direction:column;gap:.15rem;flex:1;}
+.room-item .room-name{color:var(--neon-cyan);font-family:'Press Start 2P',monospace;
+  font-size:.6rem;letter-spacing:1px;}
+.room-item button{
+  font-family:'Press Start 2P',monospace;font-size:.55rem;padding:.6rem .8rem;
+  background:var(--neon-cyan);color:#0a0410;border:none;border-radius:4px;
+  cursor:pointer;letter-spacing:1px;white-space:nowrap;
+}
+.room-item button:hover{filter:brightness(1.15);}
+.room-empty{color:#666;text-align:center;padding:1rem;font-size:1.1rem;}
+.lobby-actions{display:flex;gap:.75rem;margin-top:.75rem;flex-wrap:wrap;}
+.lobby-actions button{
+  font-family:'Press Start 2P',monospace;font-size:.6rem;padding:.8rem 1rem;
+  border-radius:6px;cursor:pointer;letter-spacing:1px;
+  background:#1a0a2a;color:var(--neon-yellow);border:2px solid var(--neon-yellow);
+}
+.lobby-actions button:hover:not(:disabled){background:var(--neon-yellow);color:#0a0410;}
+.lobby-actions button:disabled{opacity:.4;cursor:not-allowed;}
+.status-msg{margin-top:.5rem;font-size:1rem;color:var(--neon-pink);min-height:1.2rem;}
+
+.footer-note{text-align:center;margin-top:1.25rem;
+  font-family:'VT323',monospace;color:#666;font-size:1rem;}
 .footer-note span{color:var(--neon-pink);}
 
 @media (max-width:640px){
@@ -300,29 +237,22 @@ body::before{
              accept=".smc,.sfc,.nes,.gba,.gb,.gbc,.md,.gen,.bin,.iso,.cue,.zip">
     </div>
 
-    <!-- NOVO: campo de ID da sala -->
-    <div class="label">▸ ID DA SALA (opcional, para jogar em rede)</div>
-    <div style="margin-bottom:1rem;">
-      <input type="number" id="roomId" placeholder="Ex: 1234"
-             style="
-               font-family:'Press Start 2P',monospace;
-               font-size:.8rem;
-               padding:.8rem 1rem;
-               background:#050208;
-               color:var(--neon-cyan);
-               border:2px solid #4a2060;
-               border-radius:6px;
-               width:200px;
-               text-align:center;
-               letter-spacing:2px;
-             ">
-      <span style="font-family:'VT323',monospace;color:#666;font-size:.9rem;">
-        (mesmo ID nos dois PCs)
-      </span>
+    <div class="btn-row">
+      <button class="arcade-btn" id="playBtn" disabled>▶ JOGAR LOCAL</button>
+      <button class="arcade-btn cyan" id="multiplayerBtn" disabled>🌐 MULTIPLAYER ONLINE</button>
     </div>
 
-    <div class="btn-row">
-      <button class="arcade-btn" id="playBtn" disabled>▶ JOGAR</button>
+    <div class="lobby-panel" id="lobbyPanel" style="display:none;">
+      <div class="label">▸ SALAS DISPONÍVEIS</div>
+      <div class="room-list" id="roomList">
+        <div class="room-empty">Buscando salas...</div>
+      </div>
+      <div class="lobby-actions">
+        <button id="refreshRoomsBtn">⟳ ATUALIZAR</button>
+        <button id="createRoomBtn" disabled>＋ CRIAR SALA COM ESTA ROM</button>
+        <button id="closeLobbyBtn">✕ FECHAR</button>
+      </div>
+      <div class="status-msg" id="statusMsg"></div>
     </div>
   </div>
 
@@ -332,84 +262,270 @@ body::before{
 </div>
 
 <script>
-  let romUrl = null;
-  let currentCore = 'snes';
-  let gameStarted = false;
+/* ============================================================
+   CONFIGURAÇÃO — usa o hostname da página para que o cliente
+   acesse o MESMO host onde os serviços rodam.
+   ============================================================ */
+const HOST            = window.location.hostname || 'localhost';
+const NETPLAY_SERVER  = `http://${HOST}:3000`;
+const ROMSERVER       = `http://${HOST}:4000`;
 
-  const romInput       = document.getElementById('romInput');
-  const playBtn        = document.getElementById('playBtn');
-  const cartridgeSlot  = document.getElementById('cartridgeSlot');
-  const cartridgeText  = document.getElementById('cartridgeText');
-  const idleMessage    = document.getElementById('idleMessage');
-  const systemsDiv     = document.getElementById('systems');
-  const gameContainer  = document.getElementById('game');
-  const roomIdInput    = document.getElementById('roomId'); // NOVO
+const ICE_SERVERS = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'turn:openrelay.metered.ca:80',
+    username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443',
+    username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+    username: 'openrelayproject', credential: 'openrelayproject' },
+];
 
-  // (Seleção de sistema e carregamento de ROM permanecem IGUAIS)
-  systemsDiv.addEventListener('click', (e) => {
-    const btn = e.target.closest('.sys-btn');
-    if (!btn || gameStarted) return;
-    document.querySelectorAll('.sys-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentCore = btn.dataset.core;
-  });
+/* ============================================================
+   ESTADO
+   ============================================================ */
+let romFile         = null;   // File local
+let romServerInfo   = null;   // { romId, url, name } após upload
+let currentCore     = 'snes';
+let gameStarted     = false;
+let lobbyIntervalId = null;
 
-  romInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (romUrl) URL.revokeObjectURL(romUrl);
-    romUrl = URL.createObjectURL(file);
-    cartridgeText.textContent = file.name;
-    cartridgeSlot.classList.add('loaded');
-    playBtn.disabled = false;
-  });
+/* ============================================================
+   ELEMENTOS
+   ============================================================ */
+const romInput        = document.getElementById('romInput');
+const playBtn         = document.getElementById('playBtn');
+const multiplayerBtn  = document.getElementById('multiplayerBtn');
+const cartridgeSlot   = document.getElementById('cartridgeSlot');
+const cartridgeText   = document.getElementById('cartridgeText');
+const idleMessage     = document.getElementById('idleMessage');
+const systemsDiv      = document.getElementById('systems');
+const gameContainer   = document.getElementById('game');
+const lobbyPanel      = document.getElementById('lobbyPanel');
+const roomListEl      = document.getElementById('roomList');
+const refreshRoomsBtn = document.getElementById('refreshRoomsBtn');
+const createRoomBtn   = document.getElementById('createRoomBtn');
+const closeLobbyBtn   = document.getElementById('closeLobbyBtn');
+const statusMsg       = document.getElementById('statusMsg');
 
-  // Botão JOGAR — agora configura netplay se houver ID
-  playBtn.addEventListener('click', () => {
-    if (gameStarted) { location.reload(); return; }
-    if (!romUrl) return;
+/* ============================================================
+   SELEÇÃO DE SISTEMA
+   ============================================================ */
+systemsDiv.addEventListener('click', (e) => {
+  const btn = e.target.closest('.sys-btn');
+  if (!btn || gameStarted) return;
+  document.querySelectorAll('.sys-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentCore = btn.dataset.core;
+});
 
-    idleMessage.style.display = 'none';
-    gameContainer.innerHTML = '';
+/* ============================================================
+   CARREGAR ROM
+   ============================================================ */
+romInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-    // --- Configuração básica do EmulatorJS ---
-    window.EJS_player       = '#game';
-    window.EJS_core         = currentCore;
-    window.EJS_gameUrl      = romUrl;
-    window.EJS_pathtodata   = 'https://cdn.emulatorjs.org/stable/data/';
-    window.EJS_startOnLoaded = true;
+  romFile = file;
+  romServerInfo = null;
+  cartridgeText.textContent = file.name;
+  cartridgeSlot.classList.add('loaded');
+  playBtn.disabled = false;
+  multiplayerBtn.disabled = false;
 
-    // --- Netplay (se o campo de ID estiver preenchido) ---
-    const roomId = roomIdInput.value.trim();
-    if (roomId) {
-      // Endereço do servidor de netplay.
-      // Troque "localhost" pelo IP da máquina host se for jogar em outro PC.
-      window.EJS_netplayServer = 'http://localhost:3000';
+  // Pré-upload para o romserver (assim fica pronto para criar sala)
+  statusMsg.textContent = 'Enviando ROM para o servidor...';
+  try {
+    const fd = new FormData();
+    fd.append('rom', file);
+    const r = await fetch(`${ROMSERVER}/upload`, { method: 'POST', body: fd });
+    if (!r.ok) throw new Error('upload falhou');
+    romServerInfo = await r.json();
+    createRoomBtn.disabled = false;
+    statusMsg.textContent = 'ROM pronta para multiplayer.';
+  } catch (err) {
+    console.error(err);
+    statusMsg.textContent = 'Não foi possível enviar a ROM (multiplayer desabilitado).';
+  }
+});
 
-      // Cada sala precisa de um ID único. Usamos o número digitado.
-      window.EJS_gameID = parseInt(roomId, 10);
+/* ============================================================
+   INICIALIZAÇÃO DO EMULADOR
+   ============================================================ */
+function startEmulator({ core, gameUrl, gameId = null }) {
+  idleMessage.style.display = 'none';
+  gameContainer.innerHTML = '';
 
-      // STUN público do Google (suficiente para a maioria dos casos).
-      // Para jogar fora da sua rede local com NAT restritivo, adicione um TURN.
-      window.EJS_netplayICEServers = [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-      ];
+  window.EJS_player        = '#game';
+  window.EJS_core          = core;
+  window.EJS_gameUrl       = gameUrl;
+  window.EJS_pathtodata    = 'https://cdn.emulatorjs.org/stable/data/';
+  window.EJS_startOnLoaded = true;
+
+  if (gameId) {
+    window.EJS_netplayServer     = NETPLAY_SERVER;
+    window.EJS_gameID            = gameId;
+    window.EJS_netplayICEServers = ICE_SERVERS;
+  }
+
+  const script = document.createElement('script');
+  script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+  document.body.appendChild(script);
+
+  gameStarted = true;
+  playBtn.textContent = '⟲ NOVO JOGO';
+  multiplayerBtn.disabled = true;
+  closeLobby();
+}
+
+/* ============================================================
+   BOTÃO JOGAR LOCAL
+   ============================================================ */
+playBtn.addEventListener('click', () => {
+  if (gameStarted) { location.reload(); return; }
+  if (!romFile) return;
+  const blobUrl = URL.createObjectURL(romFile);
+  startEmulator({ core: currentCore, gameUrl: blobUrl });
+});
+
+/* ============================================================
+   LOBBY MULTIPLAYER
+   ============================================================ */
+multiplayerBtn.addEventListener('click', () => {
+  lobbyPanel.style.display = 'block';
+  refreshRooms();
+  if (lobbyIntervalId) clearInterval(lobbyIntervalId);
+  lobbyIntervalId = setInterval(refreshRooms, 5000);
+});
+
+closeLobbyBtn.addEventListener('click', closeLobby);
+function closeLobby() {
+  lobbyPanel.style.display = 'none';
+  if (lobbyIntervalId) { clearInterval(lobbyIntervalId); lobbyIntervalId = null; }
+}
+
+refreshRoomsBtn.addEventListener('click', refreshRooms);
+
+async function refreshRooms() {
+  try {
+    const url = `${NETPLAY_SERVER}/list?domain=${encodeURIComponent(HOST)}`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('list falhou');
+    const data = await r.json();
+    renderRooms(Array.isArray(data.rooms) ? data.rooms : []);
+  } catch (err) {
+    console.error(err);
+    roomListEl.innerHTML =
+      '<div class="room-empty">Não foi possível listar salas.<br>Verifique se o netplay está rodando.</div>';
+  }
+}
+
+function renderRooms(rooms) {
+  const ocupadas = rooms.filter(r => (r.current || 0) < (r.max || 2));
+  if (ocupadas.length === 0) {
+    roomListEl.innerHTML = '<div class="room-empty">Nenhuma sala aberta. Crie a sua!</div>';
+    return;
+  }
+  roomListEl.innerHTML = '';
+  for (const room of ocupadas) {
+    const div = document.createElement('div');
+    div.className = 'room-item';
+
+    const info = document.createElement('div');
+    info.className = 'room-info';
+    const gameId = room.game_id ?? '?';
+    const nameEl = document.createElement('div');
+    nameEl.className = 'room-name';
+    nameEl.textContent = `SALA #${gameId}`;
+    const detail = document.createElement('div');
+    detail.textContent = `${room.room_name || 'Jogador'} — ${room.current || 0}/${room.max || 2}`;
+    info.appendChild(nameEl);
+    info.appendChild(detail);
+
+    const joinBtn = document.createElement('button');
+    joinBtn.textContent = 'ENTRAR';
+    joinBtn.onclick = () => joinRoom(room.game_id);
+
+    div.appendChild(info);
+    div.appendChild(joinBtn);
+    roomListEl.appendChild(div);
+  }
+}
+
+/* ============================================================
+   CRIAR SALA (host)
+   ============================================================ */
+createRoomBtn.addEventListener('click', async () => {
+  if (!romFile) { statusMsg.textContent = 'Carregue uma ROM primeiro.'; return; }
+
+  // Garante upload
+  if (!romServerInfo) {
+    statusMsg.textContent = 'Enviando ROM...';
+    try {
+      const fd = new FormData();
+      fd.append('rom', romFile);
+      const r = await fetch(`${ROMSERVER}/upload`, { method: 'POST', body: fd });
+      romServerInfo = await r.json();
+    } catch (err) {
+      statusMsg.textContent = 'Falha no upload da ROM.';
+      return;
     }
-    // ----------------------------------------------------
+  }
 
-    const script = document.createElement('script');
-    script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
-    document.body.appendChild(script);
+  statusMsg.textContent = 'Criando sala...';
+  try {
+    const r = await fetch(`${ROMSERVER}/rooms`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        romId:   romServerInfo.romId,
+        romName: romServerInfo.name,
+      }),
+    });
+    if (!r.ok) throw new Error('create room falhou');
+    const data = await r.json();
 
-    gameStarted = true;
-    playBtn.textContent = '⟲ NOVO JOGO';
-    playBtn.style.background =
-      'radial-gradient(circle at 30% 30%,#ffdd55,#ffaa00 60%,#a06a00)';
-    playBtn.style.boxShadow =
-      '0 6px 0 #603f00,0 8px 15px rgba(0,0,0,.8),' +
-      'inset 0 -3px 5px rgba(0,0,0,.4),inset 0 3px 5px rgba(255,255,255,.3)';
-  });
+    // Host usa o blob local (rápido), mas o gameId é o da sala registrada.
+    const blobUrl = URL.createObjectURL(romFile);
+    startEmulator({
+      core:    currentCore,
+      gameUrl: blobUrl,
+      gameId:  data.gameId,
+    });
+  } catch (err) {
+    console.error(err);
+    statusMsg.textContent = 'Não foi possível criar a sala.';
+  }
+});
+
+/* ============================================================
+   ENTRAR EM SALA (client)
+   ============================================================ */
+async function joinRoom(gameId) {
+  if (!gameId) return;
+  statusMsg.textContent = `Entrando na sala #${gameId}...`;
+
+  try {
+    const r = await fetch(`${ROMSERVER}/rooms/${gameId}`);
+    if (!r.ok) {
+      statusMsg.textContent =
+        `Sala #${gameId} existe no netplay, mas a ROM não está no servidor. Peça ao host para criar a sala pelo RETROZECA.`;
+      return;
+    }
+    const info = await r.json();
+    const romUrl = `${ROMSERVER}${info.url}`;
+
+    statusMsg.textContent = `Baixando ${info.romName}...`;
+    startEmulator({
+      core:    currentCore,
+      gameUrl: romUrl,
+      gameId:  Number(gameId),
+    });
+  } catch (err) {
+    console.error(err);
+    statusMsg.textContent = 'Falha ao entrar na sala.';
+  }
+}
 </script>
 </body>
 </html>
